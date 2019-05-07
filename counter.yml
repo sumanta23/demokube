@@ -199,6 +199,53 @@ spec:
         - containerPort: 5000
 ---
 ##################################################################################################
+# backend-canary service
+##################################################################################################
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend
+  labels:
+    app: backend
+    service: backend
+spec:
+  ports:
+  - port: 5000
+    name: http
+  selector:
+    app: backend
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: backend-v2
+  labels:
+    app: backend
+    version: v2
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: backend
+        version: v2
+    spec:
+      containers:
+      - name: backend
+        image: sumanta23/counter:latest
+        args: 
+          - node 
+          - backend.js
+        imagePullPolicy: Always
+        env:
+          - name: REDIS_HOST
+            value: "redis.default.svc.cluster.local"
+          - name: DEBUG
+            value: "*"
+        ports:
+        - containerPort: 5000
+---
+##################################################################################################
 # frontend service
 ##################################################################################################
 apiVersion: v1
