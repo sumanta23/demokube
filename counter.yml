@@ -1,0 +1,135 @@
+##################################################################################################
+# redis service
+##################################################################################################
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis
+  labels:
+    app: redis
+    service: redis
+spec:
+  type: ClusterIP
+  ports:
+  - port: 6379
+    name: redis
+  selector:
+    app: redis
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: redis
+  labels:
+    app: redis
+    version: v1
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: redis
+        version: v1
+    spec:
+      containers:
+      - name: redis
+        image: redis:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 6379
+---
+##################################################################################################
+# backend service
+##################################################################################################
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend
+  labels:
+    app: backend
+    service: backend
+spec:
+  ports:
+  - port: 5000
+    name: http
+  selector:
+    app: backend
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: backend
+  labels:
+    app: backend
+    version: v1
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: backend
+        version: v1
+    spec:
+      containers:
+      - name: backend
+        image: sumanta23/counter:latest
+        args: 
+          - node 
+          - backend.js
+        imagePullPolicy: Always
+        env:
+          - name: REDIS_HOST
+            value: "redis.default.svc.cluster.local"
+          - name: DEBUG
+            value: "*"
+        ports:
+        - containerPort: 5000
+---
+##################################################################################################
+# frontend service
+##################################################################################################
+apiVersion: v1
+kind: Service
+metadata:
+  name: counter
+  labels:
+    app: counter
+    service: counter
+spec:
+  clusterIP: 10.100.224.73
+  ports:
+  - port: 3000
+    name: http
+  selector:
+    app: counter
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: counter
+  labels:
+    app: counter
+    version: v1
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: counter
+        version: v1
+    spec:
+      containers:
+      - name: counter
+        image: sumanta23/counter:latest
+        args: 
+          - node 
+          - server.js
+        imagePullPolicy: Always
+        env:
+          - name: BACK_END
+            value: "backend.default.svc.cluster.local:5000"
+          - name: DEBUG
+            value: "*"
+        ports:
+        - containerPort: 3000
+---
