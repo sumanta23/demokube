@@ -90,6 +90,10 @@ metadata:
     version: v1
 spec:
   replicas: 1
+  selector:
+    matchLabels:
+      app: nginx-c
+      version: v1
   template:
     metadata:
       labels:
@@ -138,6 +142,10 @@ metadata:
     version: v1
 spec:
   replicas: 1
+  selector:
+    matchLabels:
+      app: redis
+      version: v1
   template:
     metadata:
       labels:
@@ -171,12 +179,16 @@ spec:
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: backend
+  name: backend-v1
   labels:
     app: backend
     version: v1
 spec:
   replicas: 1
+  selector:
+    matchLabels:
+      app: backend
+      version: v1
   template:
     metadata:
       labels:
@@ -186,8 +198,8 @@ spec:
       containers:
       - name: backend
         image: sumanta23/counter:latest
-        args:
-          - node
+        args: 
+          - node 
           - backend.js
         imagePullPolicy: Always
         env:
@@ -198,23 +210,6 @@ spec:
         ports:
         - containerPort: 5000
 ---
-##################################################################################################
-# backend-canary service
-##################################################################################################
-apiVersion: v1
-kind: Service
-metadata:
-  name: backend
-  labels:
-    app: backend
-    service: backend
-spec:
-  ports:
-  - port: 5000
-    name: http
-  selector:
-    app: backend
----
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
@@ -224,6 +219,10 @@ metadata:
     version: v2
 spec:
   replicas: 1
+  selector:
+    matchLabels:
+      app: backend
+      version: v2
   template:
     metadata:
       labels:
@@ -233,9 +232,9 @@ spec:
       containers:
       - name: backend
         image: sumanta23/counter:latest
-        args: 
-          - node 
-          - backend.js
+        args:
+          - node
+          - backend2.js
         imagePullPolicy: Always
         env:
           - name: REDIS_HOST
@@ -272,6 +271,10 @@ metadata:
     version: v1
 spec:
   replicas: 1
+  selector:
+    matchLabels:
+      app: counter
+      version: v1
   template:
     metadata:
       labels:
@@ -281,8 +284,8 @@ spec:
       containers:
       - name: counter
         image: sumanta23/counter:latest
-        args:
-          - node
+        args: 
+          - node 
           - server.js
         imagePullPolicy: Always
         env:

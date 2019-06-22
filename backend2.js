@@ -26,6 +26,7 @@ var client = new Redis(convar)
 app.use(bodyParser.urlencoded({ extended: false }));
 
 app.get('/api/counter',function(req,res){
+  console.log(JSON.stringify(req.headers));
   client.incr("counter", (err,resC)=>{
       if(err){
         throw err;

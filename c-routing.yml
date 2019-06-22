@@ -42,6 +42,13 @@ spec:
   hosts:
   - backend
   http:
+  - match:
+    - x-app-user:
+        exact: jason
+    route:
+      - destination:
+          host: backend
+          subset: v2
   - route:
     - destination:
         host: backend
