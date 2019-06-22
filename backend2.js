@@ -31,7 +31,7 @@ app.get('/api/counter',function(req,res){
       if(err){
         throw err;
       }else{
-        return res.json(resC);
+        return res.json({count: resC});
       }
     });  
 });

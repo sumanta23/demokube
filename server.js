@@ -23,8 +23,25 @@ console.log("process.env.BACK_END", process.env.BACK_END)
 
 var backend = process.env.BACK_END||"localhost:5000";
 
+var filtered_keys = function(obj, filter) {
+  var key, nobj = {};
+  for (key in obj) {
+    if (obj.hasOwnProperty(key) && filter.test(key)) {
+      nobj[key]=obj[key];
+    }
+  }
+  return nobj;
+}
+
 app.get('/', function (req, res) {
-    request("http://"+backend+'/api/counter', function (error, response, body) {
+    console.log(JSON.stringify(req.headers));
+    var customheaders = filtered_keys(req.headers, /X-App/i);
+    customheaders['User-Agent']= 'request';
+    var options = {
+        url: "http://"+backend+'/api/counter',
+        headers: customheaders
+    };
+    request(options, function (error, response, body) {
         console.log('error:', error);
         console.log('statusCode:', response && response.statusCode); 
         console.log('body:', body); 
